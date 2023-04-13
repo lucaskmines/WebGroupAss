@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 
 const itemsRouter = Router();
 
@@ -54,7 +55,6 @@ itemsRouter.get('/:item_id', async (req, res) => {
 itemsRouter.post('/new', async (req, res) => {
   // Fetch the MongoDB connection pool from Application storage
   const db = req.app.get("db");
-  console.log("Post new item called");
   // TODO: Create a new document using the `createOne` method in MongoDB
   const requestBody = req.body;
   requestBody._id = uuidv4();

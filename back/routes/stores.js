@@ -2,12 +2,6 @@ import express, { Router } from 'express';
 import { itemsRouter } from './items.js'
 import { v4 as uuidv4 } from 'uuid';
 
-// This is an extension of the main thrust of the lab. You may flesh out more endpoints and then _nest_ them under
-// the classes route.
-//
-// The intent is to experiment with relations in MongoDB. See the documentation on embedding documents
-// [Embedded documents](https://www.mongodb.com/basics/embedded-mongodb)
-// [Embedded documents documentation](https://www.mongodb.com/docs/manual/tutorial/model-embedded-one-to-many-relationships-between-documents/)
 const storesRouter = express.Router();
 
 itemsRouter.mergeParams = true;
@@ -46,8 +40,6 @@ storesRouter.get('/stores', async (req, res) => {
     const db = req.app.get("db");
 
     // TODO: Retrieve all `Store` documents from MongoDB using the `find` method
-    // **NOTE**: You'll need to call `toArray` on the result to format it properly
-    
     let results = await db.collection("Stores").find({}).toArray();
     
     if(results == null){
@@ -67,10 +59,7 @@ storesRouter.get('/stores', async (req, res) => {
 
 storesRouter.get('/stores/:store_id', async (req, res) => {
   const db = req.app.get("db");
-  //console.log("stores id got called!");
   const storeId = req.params.store_id;
-  //console.log(storeId);
-  //let queryableId;
 
   // In class, we created a conflicting state where one record used the `ObjectId` and another record used a
   // string UUID. We can parse the user-supplied ID to determine if we should treat it as a string or an `ObjectId`.
@@ -85,10 +74,6 @@ storesRouter.get('/stores/:store_id', async (req, res) => {
       });
       return;
     }
-    // The MongoDB driver returns data as JavaScript objects, so we don't need to parse them to pass them to the `json` method of
-    // Express' `Response` object
-    //console.log("Store: ");
-    //console.log(store);
     res.send(store);
   } catch (e) {
     console.log(e);
