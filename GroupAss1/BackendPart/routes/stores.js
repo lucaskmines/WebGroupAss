@@ -1,0 +1,86 @@
+import express, { Router } from 'express';
+import { itemsRouter } from './items.js'
+import { v4 as uuidv4 } from 'uuid';
+
+const storesRouter = express.Router();
+
+itemsRouter.mergeParams = true;
+
+storesRouter.use("/stores/:store_id/items", itemsRouter);
+
+storesRouter.post('/stores/new', async (req, res) => {
+  console.log(req.body);
+    const requestBody = req.body;
+    requestBody._id = uuidv4();
+
+    // TODO: Fetch the MongoDB connection pool from Application storage
+    const db = req.app.get("db");
+
+    try {
+      const result = await db.collection('Stores').insertOne(req.body);
+      console.log(result);
+      res.status(201);
+      res.json({
+        status: 201,
+        message: 'created',
+      });
+    } catch (e) {
+      console.log(e);
+      res.status(500);
+      res.json({
+        status: 500,
+        message: e,
+      });
+    }
+    
+});
+
+storesRouter.get('/stores', async (req, res) => {
+    // TODO: Fetch the MongoDB connection pool from Application storage
+    const db = req.app.get("db");
+
+    // TODO: Retrieve all `Store` documents from MongoDB using the `find` method
+    let results = await db.collection("Stores").find({}).toArray();
+    
+    if(results == null){
+      //if results weren't found
+      //uh oh
+      res.status(404);
+      res.json({
+        status:404,
+        message: 'not found',
+      })
+    }
+
+    //console.log(results);
+    res.send(results);
+  }
+);
+
+storesRouter.get('/stores/:store_id', async (req, res) => {
+  const db = req.app.get("db");
+  const storeId = req.params.store_id;
+
+  // In class, we created a conflicting state where one record used the `ObjectId` and another record used a
+  // string UUID. We can parse the user-supplied ID to determine if we should treat it as a string or an `ObjectId`.
+
+  try {
+    const store = await db.collection("Stores").find({ _id: storeId }).toArray();
+    if (store === null) {
+      res.status(404);
+      res.json({
+        status: 404,
+        message: 'not found',
+      });
+      return;
+    }
+    res.send(store);
+  } catch (e) {
+    console.log(e);
+    res.status(500);
+    res.send('');
+  }
+  
+});
+
+export { storesRouter };
